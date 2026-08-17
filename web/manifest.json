@@ -1,11 +1,11 @@
 {
-    "name": "portofolio",
-    "short_name": "portofolio",
+    "name": "Ario Sutrisno Portfolio",
+    "short_name": "Ario Portfolio",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#002561",
+    "theme_color": "#002561",
+    "description": "Aviation operations and software portfolio by Ario Sutrisno.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

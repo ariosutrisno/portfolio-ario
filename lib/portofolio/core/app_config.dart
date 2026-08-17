@@ -1,10 +1,14 @@
-/// Portfolio identity and external destinations live here so personal details
-/// are changed once and reused by every page and platform.
+import 'bio_config.dart';
+
+/// Global application metadata and external destinations.
+///
+/// Personal information lives in [BioConfig].
 abstract final class AppConfig {
-  static const name = 'Ario Sutrisno';
-  static const appTitle = '$name — Technology Portfolio';
-  static const email = 'your-email@example.com';
-  static const linkedInUrl = '';
-  static const githubUrl = '';
-  static const resumeUrl = '';
+  static const name = BioConfig.name;
+  static const workplace = 'Garuda Indonesia';
+  static const appTitle = '$name — Full-Stack Developer · Mobile & Web';
+  static const publicRole = 'Developer · System Analyst · Aviation Operations';
+  static const email = BioConfig.email;
+  static const linkedInUrl = ' https://id.linkedin.com/in/ario-sutrisno';
+  static const githubUrl = 'https://github.com/ariosutrisno';
 }

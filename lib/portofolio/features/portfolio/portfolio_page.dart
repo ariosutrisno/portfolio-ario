@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:portofolio/portofolio/core/app_config.dart';
+import 'package:portofolio/portofolio/core/bio_config.dart';
 import 'package:portofolio/portofolio/core/design_system.dart';
+import 'package:portofolio/portofolio/features/case_study/case_study_data.dart';
+import 'package:portofolio/portofolio/features/case_study/case_study_page.dart';
+import 'package:portofolio/portofolio/features/resume/resume_page.dart';
 
 class PortfolioPage extends StatefulWidget {
   const PortfolioPage({super.key});
@@ -15,7 +19,20 @@ class _PortfolioPageState extends State<PortfolioPage> {
   final scaffold = GlobalKey<ScaffoldState>();
   final sections = List.generate(5, (_) => GlobalKey());
 
+  Future<void> openResume() async {
+    if (scaffold.currentState?.isEndDrawerOpen ?? false) {
+      Navigator.pop(context);
+      await Future<void>.delayed(context.accessibleDuration(AppMotion.fast));
+    }
+    if (!mounted) return;
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const ResumePage()));
+  }
+
   Future<void> go(int index) async {
+    // Read inherited accessibility state before a possible drawer-close await.
+    final navigationDuration = context.accessibleDuration(AppMotion.navigation);
     if (scaffold.currentState?.isEndDrawerOpen ?? false) {
       Navigator.pop(context);
       await Future<void>.delayed(const Duration(milliseconds: 150));
@@ -24,7 +41,7 @@ class _PortfolioPageState extends State<PortfolioPage> {
     if (target != null && target.mounted) {
       await Scrollable.ensureVisible(
         target,
-        duration: AppMotion.navigation,
+        duration: navigationDuration,
         curve: AppMotion.curve,
         alignment: .02,
       );
@@ -47,13 +64,7 @@ class _PortfolioPageState extends State<PortfolioPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffold,
-      endDrawer: MobileMenu(
-        onNav: go,
-        onResume: () {
-          Navigator.pop(context);
-          notice('Add resume.html or a CV URL to activate the Resume button.');
-        },
-      ),
+      endDrawer: MobileMenu(onNav: go, onResume: openResume),
       body: SafeArea(
         bottom: false,
         child: SelectionArea(
@@ -61,6 +72,10 @@ class _PortfolioPageState extends State<PortfolioPage> {
             children: [
               const Positioned.fill(child: Background()),
               SingleChildScrollView(
+                primary: true,
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                restorationId: 'portfolio-scroll',
                 child: Column(
                   children: [
                     SizedBox(height: context.navigationHeight),
@@ -90,9 +105,7 @@ class _PortfolioPageState extends State<PortfolioPage> {
                 child: Header(
                   onNav: go,
                   onMenu: () => scaffold.currentState?.openEndDrawer(),
-                  onResume: () => notice(
-                    'Add resume.html or a CV URL to activate the Resume button.',
-                  ),
+                  onResume: openResume,
                 ),
               ),
             ],
@@ -107,24 +120,7 @@ class Background extends StatelessWidget {
   const Background({super.key});
   @override
   Widget build(BuildContext context) => const IgnorePointer(
-    child: DecoratedBox(
-      decoration: BoxDecoration(gradient: AppGradients.background),
-    ),
-  );
-}
-
-class Shell extends StatelessWidget {
-  const Shell({super.key, required this.child});
-  final Widget child;
-  @override
-  Widget build(BuildContext context) => Center(
-    child: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: AppLayout.maxContentWidth),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: context.pageGutter),
-        child: child,
-      ),
-    ),
+    child: DecoratedBox(decoration: BoxDecoration(color: C.background)),
   );
 }
 
@@ -141,19 +137,19 @@ class Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-    color: C.background.withValues(alpha: .72),
+    color: C.headerGlass,
     child: Container(
       height: context.navigationHeight,
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: C.line)),
       ),
-      child: Shell(
+      child: AppShell(
         child: LayoutBuilder(
           builder: (context, box) {
             final desktop = box.maxWidth >= AppBreakpoints.navigation;
             return Row(
               children: [
-                Brand(showName: box.maxWidth >= 290),
+                AppIdentityMark(showName: box.maxWidth >= 360),
                 const Spacer(),
                 if (desktop) ...[
                   for (final e in [
@@ -187,7 +183,7 @@ class Header extends StatelessWidget {
                 ] else
                   IconButton(
                     onPressed: onMenu,
-                    tooltip: 'Buka menu',
+                    tooltip: 'Open menu',
                     icon: const Icon(Icons.menu_rounded),
                   ),
               ],
@@ -196,50 +192,6 @@ class Header extends StatelessWidget {
         ),
       ),
     ),
-  );
-}
-
-class Brand extends StatelessWidget {
-  const Brand({super.key, this.showName = true});
-  final bool showName;
-  @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Container(
-        width: 35,
-        height: 35,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              C.text.withValues(alpha: .09),
-              C.text.withValues(alpha: .02),
-            ],
-          ),
-          border: Border.all(color: C.lineStrong),
-          borderRadius: BorderRadius.circular(AppRadius.small),
-        ),
-        child: const Text(
-          'AS',
-          style: TextStyle(
-            fontSize: AppTypeScale.small,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-      ),
-      if (showName) ...[
-        const SizedBox(width: 12),
-        const Text(
-          'ARIO SUTRISNO',
-          style: TextStyle(
-            fontSize: AppTypeScale.bodySmall,
-            letterSpacing: 1.5,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ],
-    ],
   );
 }
 
@@ -259,7 +211,7 @@ class MobileMenu extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Brand(showName: false),
+                const AppIdentityMark(showName: false),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.close_rounded),
@@ -314,7 +266,7 @@ class HeroSection extends StatelessWidget {
   final VoidCallback onAbout;
 
   @override
-  Widget build(BuildContext context) => Shell(
+  Widget build(BuildContext context) => AppShell(
     child: LayoutBuilder(
       builder: (context, box) {
         final desktop = box.maxWidth >= AppBreakpoints.hero;
@@ -365,16 +317,14 @@ class HeroCopy extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Eyebrow('TECHNOLOGY · DATA · AI · BUSINESS'),
+      const Eyebrow('GARUDA INDONESIA · OPERATIONS · SOFTWARE'),
       const SizedBox(height: 22),
       Text.rich(
         TextSpan(
           children: [
-            const TextSpan(
-              text: 'Engineering systems that turn complex operations into ',
-            ),
+            const TextSpan(text: 'Turning aviation experience into '),
             TextSpan(
-              text: 'measurable impact.',
+              text: 'clear digital tools.',
               style: const TextStyle(color: C.lime),
             ),
           ],
@@ -390,7 +340,7 @@ class HeroCopy extends StatelessWidget {
       ),
       const SizedBox(height: 24),
       Text(
-        'Full-stack developer evolving toward technology leadership — building enterprise software, data intelligence, automation, and digital products with a strong operational mindset.',
+        'I’m ${BioConfig.name}. I work at ${AppConfig.workplace} and I’m building my path into software development through two operationally grounded projects, extensive Codex assistance, and honest continuous learning.',
         style: TextStyle(
           color: C.leadText,
           fontSize: context.isCompact
@@ -425,9 +375,9 @@ class HeroCopy extends StatelessWidget {
         spacing: 34,
         runSpacing: 20,
         children: [
-          Proof('End-to-end', 'Product & engineering ownership'),
-          Proof('Operational', 'Real-world systems & workflows'),
-          Proof('Executive-minded', 'Technology tied to business outcomes'),
+          Proof('2 real projects', 'FSMS & Digital Ramp Checklist'),
+          Proof('Aviation context', 'Experience from Garuda Indonesia'),
+          Proof('AI-assisted', 'Built openly with extensive Codex use'),
         ],
       ),
     ],
@@ -478,10 +428,9 @@ class HeroVisual extends StatelessWidget {
                   context.isCompact ? AppSpace.base : AppSpace.lg,
                 ),
                 decoration: BoxDecoration(
-                  color: C.panel.withValues(alpha: .97),
+                  color: C.panel97,
                   border: Border.all(color: C.lineStrong),
                   borderRadius: BorderRadius.circular(AppRadius.hero),
-                  boxShadow: AppShadows.elevated,
                 ),
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -501,7 +450,7 @@ class HeroVisual extends StatelessWidget {
                                 fit: BoxFit.scaleDown,
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                  'CAREER OPERATING SYSTEM',
+                                  'FIRST PORTFOLIO · LEARNING IN PUBLIC',
                                   style: TextStyle(
                                     color: C.muted,
                                     fontSize: AppTypeScale.label,
@@ -515,7 +464,7 @@ class HeroVisual extends StatelessWidget {
                         ),
                         const SizedBox(height: 23),
                         Text(
-                          'Build → Scale → Lead',
+                          'Observe → Build → Improve',
                           style: AppFonts.heading(
                             const TextStyle(
                               fontSize: AppTypeScale.titleLarge,
@@ -527,17 +476,17 @@ class HeroVisual extends StatelessWidget {
                         const SizedBox(height: 21),
                         const Row(
                           children: [
-                            Expanded(child: MiniSkill('01', 'ENGINEERING')),
+                            Expanded(child: MiniSkill('01', 'LARAVEL')),
                             SizedBox(width: 10),
-                            Expanded(child: MiniSkill('02', 'DATA & AI')),
+                            Expanded(child: MiniSkill('02', 'FLUTTER')),
                           ],
                         ),
                         const SizedBox(height: 10),
                         const Row(
                           children: [
-                            Expanded(child: MiniSkill('03', 'ARCHITECTURE')),
+                            Expanded(child: MiniSkill('03', 'MYSQL')),
                             SizedBox(width: 10),
-                            Expanded(child: MiniSkill('04', 'STRATEGY')),
+                            Expanded(child: MiniSkill('04', 'CODEX')),
                           ],
                         ),
                         const SizedBox(height: 21),
@@ -551,7 +500,7 @@ class HeroVisual extends StatelessWidget {
                                 fit: BoxFit.scaleDown,
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                  'TECHNOLOGY LEADERSHIP TRAJECTORY',
+                                  'HONEST · TESTED · ITERATIVE',
                                   style: TextStyle(
                                     color: C.muted,
                                     fontSize: AppTypeScale.micro,
@@ -572,16 +521,16 @@ class HeroVisual extends StatelessWidget {
               ),
             ),
           ),
-          const Positioned(top: 48, left: 0, child: FloatTag('SYSTEM DESIGN')),
+          const Positioned(top: 48, left: 0, child: FloatTag('GARUDA CONTEXT')),
           const Positioned(
             right: -4,
             top: 100,
-            child: FloatTag('AI AUTOMATION'),
+            child: FloatTag('2 REAL PROJECTS'),
           ),
           const Positioned(
             bottom: 50,
             left: 18,
-            child: FloatTag('BUSINESS IMPACT'),
+            child: FloatTag('AI-ASSISTED'),
           ),
         ],
       ),
@@ -603,7 +552,7 @@ class OrbitPainter extends CustomPainter {
       ..strokeWidth = 1;
     p.color = C.line;
     canvas.drawCircle(center, size.shortestSide * .43, p);
-    p.color = C.lime.withValues(alpha: .23);
+    p.color = C.accentGlow23;
     canvas.drawCircle(center, size.shortestSide * .34, p);
     canvas.drawCircle(
       Offset(size.width * .82, size.height * .25),
@@ -627,11 +576,7 @@ class SignalDot extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     width: 8,
     height: 8,
-    decoration: const BoxDecoration(
-      color: C.lime,
-      shape: BoxShape.circle,
-      boxShadow: [BoxShadow(color: C.lime, blurRadius: 8)],
-    ),
+    decoration: const BoxDecoration(color: C.lime, shape: BoxShape.circle),
   );
 }
 
@@ -696,26 +641,25 @@ class CapabilityBand extends StatelessWidget {
     width: double.infinity,
     color: C.lime,
     padding: const EdgeInsets.symmetric(vertical: 19),
-    child: Shell(
+    child: AppShell(
       child: Wrap(
         alignment: WrapAlignment.center,
         spacing: 15,
         runSpacing: 9,
         children: [
           for (final item in [
-            'FULL-STACK ENGINEERING',
-            'MOBILE ENGINEERING',
-            'BACKEND & API',
-            'DATA ENGINEERING',
-            'AI & AUTOMATION',
-            'SYSTEM ARCHITECTURE',
-            'DIGITAL TRANSFORMATION',
+            'MICROSOFT OFFICE',
+            'MYSQL / MARIADB',
+            'LARAVEL',
+            'FLUTTER',
+            'BOOTSTRAP',
+            'CODEX / AI WORKFLOW',
           ])
             Text(
               '$item  •',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: C.ink,
+                color: C.darkText,
                 fontSize: AppTypeScale.caption,
                 letterSpacing: .8,
                 fontWeight: FontWeight.w900,
@@ -805,52 +749,35 @@ class SectionHead extends StatelessWidget {
 enum Art { flight, ai, architecture }
 
 class Project {
-  const Project(
-    this.number,
-    this.type,
-    this.title,
-    this.description,
-    this.tags,
-    this.art,
-  );
+  const Project(this.number, this.type, this.study, this.tags, this.art);
   final String number;
   final String type;
-  final String title;
-  final String description;
+  final CaseStudyData study;
   final List<String> tags;
   final Art art;
+
+  String get title => study.title;
+  String get description => study.summary;
 }
 
 class WorkSection extends StatelessWidget {
   const WorkSection({super.key});
   static const data = [
-    Project(
-      '01',
-      'ENTERPRISE PRODUCT',
-      'Digital Ramp Operations Management Platform',
-      'A role-based operational platform for managing flight assignments, turnaround activities, safety checks, delay information, approvals, and operational history.',
-      ['Flutter', 'API', 'RBAC', 'Operations'],
-      Art.flight,
-    ),
-    Project(
-      '02',
-      'DATA INTELLIGENCE',
-      'AI Aviation Data Quality Platform',
-      'An anomaly-detection and data-quality concept that combines deterministic rules, confidence scoring, AI-assisted explanations, and human review.',
-      ['Data Quality', 'AI', 'Automation', 'Analytics'],
-      Art.ai,
-    ),
-    Project(
-      '03',
-      'ENTERPRISE SYSTEMS',
-      'Enterprise Integration Architecture',
-      'A scalable integration blueprint connecting flight, aircraft, operational, and user systems through APIs, queues, caching, observability, and clear domain boundaries.',
-      ['API', 'Events', 'System Design', 'Scalability'],
-      Art.architecture,
-    ),
+    Project('01', 'STATION MANAGEMENT', CaseStudies.fsms, [
+      'Laravel',
+      'MySQL / MariaDB',
+      'Bootstrap',
+      'Codex',
+    ], Art.architecture),
+    Project('02', 'MOBILE CHECKLIST', CaseStudies.digitalRamp, [
+      'Flutter',
+      'Workflow',
+      'Mobile UX',
+      'Codex',
+    ], Art.flight),
   ];
   @override
-  Widget build(BuildContext context) => Shell(
+  Widget build(BuildContext context) => AppShell(
     child: Padding(
       padding: EdgeInsets.symmetric(vertical: context.sectionSpace),
       child: Column(
@@ -858,15 +785,13 @@ class WorkSection extends StatelessWidget {
           const SectionHead(
             '01',
             'SELECTED WORK',
-            'Projects designed around real operational problems.',
-            'Each case study explains the business problem, product decision, architecture, implementation approach, and the impact the system is designed to create.',
+            'Two honest projects shaped by aviation operations.',
+            'These are the projects I am prepared to discuss truthfully: what I observed, what I built with extensive AI assistance, what I understand today, and what I still need to improve.',
           ),
           const SizedBox(height: 52),
           LayoutBuilder(
             builder: (context, box) {
-              final columns = context.screenWidth >= AppBreakpoints.large
-                  ? 3
-                  : (context.screenWidth >= AppBreakpoints.medium ? 2 : 1);
+              final columns = box.maxWidth > AppBreakpoints.medium ? 2 : 1;
               const gap = AppSpace.lg;
               final width = (box.maxWidth - gap * (columns - 1)) / columns;
               return Wrap(
@@ -874,12 +799,143 @@ class WorkSection extends StatelessWidget {
                 runSpacing: gap,
                 children: [
                   for (final p in data)
-                    SizedBox(width: width, child: ProjectCard(p)),
+                    AppReveal(
+                      child: SizedBox(width: width, child: ProjectCard(p)),
+                    ),
                 ],
               );
             },
           ),
+          const SizedBox(height: AppSpace.huge),
+          const _ConceptStudies(),
         ],
+      ),
+    ),
+  );
+}
+
+class _ConceptStudies extends StatelessWidget {
+  const _ConceptStudies();
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Eyebrow('LEARNING LAB · CLEARLY LABELLED CONCEPTS'),
+      const SizedBox(height: AppSpace.md),
+      Text(
+        'Exploring what I want to learn next.',
+        style: AppFonts.heading(
+          TextStyle(
+            fontSize: AppTypeScale.panelTitle(context.screenWidth),
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+      const SizedBox(height: AppSpace.sm),
+      ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 720),
+        child: const Text(
+          'These are study exercises, not deployed company projects. They show my direction in data, AI, and system architecture without overstating my experience.',
+          style: TextStyle(color: C.muted, height: 1.6),
+        ),
+      ),
+      const SizedBox(height: AppSpace.xl),
+      LayoutBuilder(
+        builder: (context, box) {
+          final columns = box.maxWidth > 760 ? 2 : 1;
+          const gap = AppSpace.md;
+          final width = (box.maxWidth - gap * (columns - 1)) / columns;
+          return Wrap(
+            spacing: gap,
+            runSpacing: gap,
+            children: [
+              for (final study in CaseStudies.concepts)
+                AppReveal(
+                  child: SizedBox(width: width, child: _ConceptCard(study)),
+                ),
+            ],
+          );
+        },
+      ),
+    ],
+  );
+}
+
+class _ConceptCard extends StatelessWidget {
+  const _ConceptCard(this.study);
+
+  final CaseStudyData study;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: C.panel2,
+    shape: RoundedRectangleBorder(
+      side: const BorderSide(color: C.line),
+      borderRadius: BorderRadius.circular(AppRadius.large),
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => CaseStudyPage(study: study)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpace.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.science_outlined, color: C.accent2, size: 20),
+                const SizedBox(width: AppSpace.xs),
+                const Text(
+                  'CONCEPT STUDY',
+                  style: TextStyle(
+                    color: C.accent2,
+                    fontSize: AppTypeScale.label,
+                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpace.base),
+            Text(
+              study.title,
+              style: AppFonts.heading(
+                const TextStyle(
+                  fontSize: AppTypeScale.title,
+                  height: 1.2,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpace.sm),
+            Text(
+              study.summary,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: C.muted,
+                fontSize: AppTypeScale.bodySmall,
+                height: 1.55,
+              ),
+            ),
+            const SizedBox(height: AppSpace.base),
+            const Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Read learning notes',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                ),
+                SizedBox(width: AppSpace.xs),
+                Icon(Icons.arrow_outward_rounded, size: 17),
+              ],
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -899,13 +955,12 @@ class _ProjectCardState extends State<ProjectCard> {
     onEnter: (_) => setState(() => hover = true),
     onExit: (_) => setState(() => hover = false),
     child: AnimatedContainer(
-      duration: AppMotion.hover,
-      transform: Matrix4.translationValues(0, hover ? -6 : 0, 0),
+      duration: context.accessibleDuration(AppMotion.hover),
+      curve: AppMotion.standardCurve,
       decoration: BoxDecoration(
-        color: C.panel,
+        color: hover ? C.panel2 : C.panel,
         border: Border.all(color: hover ? C.lime : C.line),
         borderRadius: BorderRadius.circular(AppRadius.card),
-        boxShadow: hover ? AppShadows.hover : AppShadows.card,
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -957,24 +1012,10 @@ class _ProjectCardState extends State<ProjectCard> {
                 ),
                 const SizedBox(height: 18),
                 TextButton.icon(
-                  onPressed: () => showDialog<void>(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      backgroundColor: C.panel2,
-                      title: Text(widget.project.title),
-                      content: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 480),
-                        child: Text(
-                          '${widget.project.description}\n\nThis case study will cover the problem, process, architecture, contribution, and measurable results.',
-                          style: const TextStyle(color: C.muted, height: 1.6),
-                        ),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Close'),
-                        ),
-                      ],
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          CaseStudyPage(study: widget.project.study),
                     ),
                   ),
                   iconAlignment: IconAlignment.end,
@@ -1004,7 +1045,7 @@ class ProjectArt extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     height: context.isCompact ? 270 : 330,
     padding: EdgeInsets.all(context.isCompact ? AppSpace.lg : 28),
-    decoration: const BoxDecoration(gradient: AppGradients.projectArt),
+    decoration: const BoxDecoration(color: C.artStart),
     child: MediaQuery.withClampedTextScaling(
       minScaleFactor: 1,
       maxScaleFactor: 1,
@@ -1017,19 +1058,13 @@ class ProjectArt extends StatelessWidget {
   );
 }
 
-const artMuted = TextStyle(
-  color: C.muted,
-  fontSize: AppTypeScale.micro,
-  fontWeight: FontWeight.w700,
-);
-
 class FlightArt extends StatelessWidget {
   const FlightArt({super.key});
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Text('AVIATION OPERATIONS', style: artMuted),
+      const Text('AVIATION OPERATIONS', style: AppTextStyles.artMuted),
       const Spacer(),
       ArtPanel(
         child: Column(
@@ -1039,7 +1074,7 @@ class FlightArt extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Row(
                 children: [
-                  Text('FLT', style: artMuted),
+                  Text('FLT', style: AppTextStyles.artMuted),
                   SizedBox(width: 12),
                   Text('GA 687', style: TextStyle(fontWeight: FontWeight.w900)),
                   SizedBox(width: 28),
@@ -1065,7 +1100,7 @@ class FlightArt extends StatelessWidget {
                 children: [
                   Icon(Icons.check_circle, color: C.lime, size: 15),
                   SizedBox(width: 7),
-                  Text('TURNAROUND ON TRACK', style: artMuted),
+                  Text('TURNAROUND ON TRACK', style: AppTextStyles.artMuted),
                 ],
               ),
             ),
@@ -1082,7 +1117,7 @@ class AiArt extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Text('DATA & AI', style: artMuted),
+      const Text('DATA & AI', style: AppTextStyles.artMuted),
       const Spacer(),
       LayoutBuilder(
         builder: (context, box) {
@@ -1096,7 +1131,7 @@ class AiArt extends StatelessWidget {
                   fontWeight: FontWeight.w900,
                 ),
               ),
-              Text('CONFIDENCE', style: artMuted),
+              Text('CONFIDENCE', style: AppTextStyles.artMuted),
             ],
           );
           const statuses = Column(
@@ -1136,7 +1171,14 @@ class Status extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      Expanded(child: Text(text, style: artMuted)),
+      Expanded(
+        child: Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyles.artMuted,
+        ),
+      ),
       Text(
         ok ? 'PASS' : 'REVIEW',
         style: TextStyle(
@@ -1154,11 +1196,12 @@ class ArchitectureArt extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, box) {
-      final nodeWidth = (box.maxWidth / 3).clamp(48.0, 68.0);
+      // Preserve a small connector between nodes even inside 240 px viewports.
+      final nodeWidth = ((box.maxWidth - AppSpace.md) / 3).clamp(36.0, 68.0);
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('ARCHITECTURE', style: artMuted),
+          const Text('ARCHITECTURE', style: AppTextStyles.artMuted),
           const Spacer(),
           Row(
             children: [
@@ -1183,7 +1226,7 @@ class ArtPanel extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: C.ink.withValues(alpha: .72),
+      color: C.headerGlass,
       border: Border.all(color: C.line),
       borderRadius: BorderRadius.circular(5),
     ),
@@ -1247,53 +1290,35 @@ class ExpertiseSection extends StatelessWidget {
   static const data = [
     (
       '01',
-      'Product Engineering',
-      'From requirements and user flows to production-ready mobile and web experiences.',
-      'Flutter · Web · UX Flow · State Management',
+      'Hard Skills',
+      'The practical tools I can honestly list today for office work and structured relational data.',
+      'Microsoft Office · MySQL / MariaDB',
     ),
     (
       '02',
-      'Backend & APIs',
-      'Clear domain logic, secure APIs, data validation, integrations, and maintainable architecture.',
-      'Laravel · REST · Auth · SQL · Business Rules',
+      'Frameworks',
+      'The application frameworks I currently use to turn ideas into web and mobile prototypes.',
+      'Laravel · Flutter · Bootstrap',
     ),
     (
       '03',
-      'Data Engineering',
-      'Cleaning, matching, validating, and transforming operational datasets into decision-ready information.',
-      'Power Query · SQL · Data Quality · ETL',
-    ),
-    (
-      '04',
-      'AI & Automation',
-      'Applying AI where it improves detection, explanation, prioritization, and operational efficiency.',
-      'Agents · Rule Engines · Confidence Scoring',
-    ),
-    (
-      '05',
-      'System Architecture',
-      'Designing boundaries, data flows, integration patterns, security, observability, and scale.',
-      'Architecture · Events · Caching · RBAC',
-    ),
-    (
-      '06',
-      'Technology Strategy',
-      'Connecting engineering investment with productivity, risk reduction, customer value, and growth.',
-      'Roadmaps · Governance · KPI · Business Impact',
+      'AI-Assisted Workflow',
+      'I use Codex extensively to generate, explain, refactor, and test code while I strengthen my own understanding.',
+      'Codex · Prompting · Code Review · Testing Support',
     ),
   ];
   @override
   Widget build(BuildContext context) => Container(
-    color: C.panel.withValues(alpha: .75),
+    color: C.panel75,
     padding: EdgeInsets.symmetric(vertical: context.sectionSpace),
-    child: Shell(
+    child: AppShell(
       child: Column(
         children: [
           const SectionHead(
             '02',
-            'EXPERTISE',
-            'More than a stack. A complete problem-solving system.',
-            'The goal is not to collect technologies. It is to understand the problem, design the right system, build it reliably, and connect the outcome to business value.',
+            'CURRENT TOOLKIT',
+            'A focused stack, presented without exaggeration.',
+            'I would rather show a small list I genuinely use than fill this portfolio with technologies I cannot yet explain. This toolkit will grow as my fundamentals and project experience grow.',
           ),
           const SizedBox(height: 52),
           LayoutBuilder(
@@ -1307,7 +1332,9 @@ class ExpertiseSection extends StatelessWidget {
                 runSpacing: 1,
                 children: [
                   for (final e in data)
-                    SizedBox(width: width, child: ExpertiseCard(e)),
+                    AppReveal(
+                      child: SizedBox(width: width, child: ExpertiseCard(e)),
+                    ),
                 ],
               );
             },
@@ -1371,36 +1398,36 @@ class JourneySection extends StatelessWidget {
   static const data = [
     (
       'NOW',
-      'Full-Stack Developer',
-      'Ship reliable products, understand operations deeply, and strengthen engineering fundamentals.',
+      'Garuda Indonesia',
+      'Building strong operational context while learning how software can make familiar workflows clearer.',
+    ),
+    (
+      'BUILDING',
+      'First Portfolio',
+      'Develop FSMS and Digital Ramp Checklist with Flutter, Laravel, databases, testing, and extensive Codex support.',
     ),
     (
       'NEXT',
-      'Senior / Tech Lead',
-      'Own architecture decisions, improve team delivery, mentor engineers, and reduce technical risk.',
+      'Junior / Full-Stack Opportunity',
+      'Join a team where I can contribute honestly, receive feedback, and improve technical independence.',
     ),
     (
-      'LEADERSHIP',
-      'Head / CTO / CIO',
-      'Shape platforms, teams, governance, technology strategy, budgets, and measurable transformation.',
-    ),
-    (
-      'EXECUTIVE',
-      'Director / CEO / Board',
-      'Connect technology, people, capital, risk, product, and market opportunity into long-term enterprise value.',
+      'GROWTH',
+      'Reliable Product Engineer',
+      'Build stronger fundamentals, clearer communication, collaboration habits, and ownership over real outcomes.',
     ),
   ];
   @override
-  Widget build(BuildContext context) => Shell(
+  Widget build(BuildContext context) => AppShell(
     child: Padding(
       padding: EdgeInsets.symmetric(vertical: context.sectionSpace),
       child: Column(
         children: [
           const SectionHead(
             '03',
-            'CAREER JOURNEY',
-            'Building toward technology leadership.',
-            'The portfolio is designed to evolve as responsibilities grow — from hands-on engineering to architecture, leadership, business ownership, and executive decision-making.',
+            'LEARNING JOURNEY',
+            'Starting from operations and moving carefully into software.',
+            'My direction is ambitious, but the next step is intentionally practical: understand the code I build, contribute inside a team, and become more independent through repeated real work.',
           ),
           const SizedBox(height: 58),
           LayoutBuilder(
@@ -1411,7 +1438,11 @@ class JourneySection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     for (final e in data.indexed) ...[
-                      Expanded(child: JourneyItem(e.$2, active: e.$1 == 0)),
+                      Expanded(
+                        child: AppReveal(
+                          child: JourneyItem(e.$2, active: e.$1 == 0),
+                        ),
+                      ),
                       if (e.$1 < data.length - 1)
                         const Expanded(
                           child: Padding(
@@ -1433,12 +1464,14 @@ class JourneySection extends StatelessWidget {
                 spacing: gap,
                 children: [
                   for (final e in data.indexed)
-                    SizedBox(
-                      width: itemWidth,
-                      child: JourneyItem(
-                        e.$2,
-                        active: e.$1 == 0,
-                        vertical: true,
+                    AppReveal(
+                      child: SizedBox(
+                        width: itemWidth,
+                        child: JourneyItem(
+                          e.$2,
+                          active: e.$1 == 0,
+                          vertical: true,
+                        ),
                       ),
                     ),
                 ],
@@ -1522,7 +1555,7 @@ class AboutSection extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     color: C.lightSurface,
     padding: EdgeInsets.symmetric(vertical: context.sectionSpace),
-    child: Shell(
+    child: AppShell(
       child: LayoutBuilder(
         builder: (context, box) {
           final desktop = box.maxWidth >= AppBreakpoints.splitContent;
@@ -1532,10 +1565,10 @@ class AboutSection extends StatelessWidget {
               Eyebrow('04 — ABOUT', dark: true),
               SizedBox(height: 20),
               Text(
-                'I build at the intersection of operations, engineering, and business.',
+                'I’m bringing operational experience into my first serious software portfolio.',
                 style: AppFonts.heading(
                   TextStyle(
-                    color: C.ink,
+                    color: C.darkText,
                     fontSize: AppTypeScale.sectionTitle(context.screenWidth),
                     height: 1.04,
                     letterSpacing: -1.3,
@@ -1578,9 +1611,9 @@ class AboutCopy extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'My focus is building technology that solves real operational problems — not technology for its own sake.',
+          'I work at Garuda Indonesia, and that environment gives me real problems to observe before I write code.',
           style: TextStyle(
-            color: C.ink,
+            color: C.darkText,
             fontSize: AppTypeScale.title,
             height: 1.5,
             fontWeight: FontWeight.w700,
@@ -1588,16 +1621,19 @@ class AboutCopy extends StatelessWidget {
         ),
         SizedBox(height: 20),
         Text(
-          'I approach projects by understanding the workflow first, translating that workflow into clear product and system decisions, then implementing the solution with maintainability, data integrity, and user impact in mind.',
+          'I currently depend heavily on Codex and AI during development. I do not want to hide that. AI helps me move from an idea to working code, while I keep learning how the structure works, how to test it, and how to identify mistakes.',
         ),
         SizedBox(height: 20),
         Text(
-          'Over time, my goal is to expand from hands-on software engineering into architecture, product strategy, technology leadership, and executive responsibility.',
+          'My next goal is not an inflated title. It is a real software opportunity where I can contribute, learn from stronger developers, communicate more clearly, and gradually become technically independent.',
         ),
         SizedBox(height: 28),
-        Principle('01', 'Understand the business before the code.'),
-        Principle('02', 'Design systems for clarity, auditability, and scale.'),
-        Principle('03', 'Measure outcomes, not just features shipped.'),
+        Principle(
+          '01',
+          'Be honest about what I know and what AI helped build.',
+        ),
+        Principle('02', 'Understand the workflow before adding features.'),
+        Principle('03', 'Test, ask for feedback, and improve continuously.'),
       ],
     ),
   );
@@ -1628,7 +1664,10 @@ class Principle extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(color: C.ink, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: C.darkText,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],
@@ -1640,20 +1679,20 @@ class LeadershipSection extends StatelessWidget {
   const LeadershipSection({super.key});
   static const data = [
     (
-      'ENGINEERING',
-      'Reliability, performance, architecture, maintainability, delivery discipline.',
+      'COMMUNICATION',
+      'Learning to explain decisions in simpler language, ask clearer questions, and share progress without hiding uncertainty.',
     ),
     (
-      'PEOPLE',
-      'Communication, mentoring, alignment, ownership, decision clarity.',
+      'COLLABORATION',
+      'Building confidence to receive feedback, work with different perspectives, and contribute consistently inside a team.',
     ),
     (
-      'BUSINESS',
-      'Impact, risk, cost, efficiency, user value, growth opportunities.',
+      'OWNERSHIP',
+      'Moving from accepting AI output to understanding, testing, maintaining, and taking responsibility for the result.',
     ),
   ];
   @override
-  Widget build(BuildContext context) => Shell(
+  Widget build(BuildContext context) => AppShell(
     child: Padding(
       padding: EdgeInsets.symmetric(
         vertical: context.responsive(
@@ -1662,44 +1701,48 @@ class LeadershipSection extends StatelessWidget {
           expanded: 92.0,
         ),
       ),
-      child: Container(
-        padding: EdgeInsets.all(
-          context.responsive(compact: 26.0, medium: 40.0, expanded: 48.0),
-        ),
-        decoration: BoxDecoration(
-          gradient: AppGradients.leadership,
-          border: Border.all(color: C.line),
-          borderRadius: BorderRadius.circular(AppRadius.card),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Eyebrow('05 — LEADERSHIP MINDSET'),
-            const SizedBox(height: 18),
-            Text(
-              'From building features to building capability.',
-              style: AppFonts.heading(
-                TextStyle(
-                  fontSize: AppTypeScale.sectionTitle(context.screenWidth),
-                  height: 1.04,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -1,
+      child: AppReveal(
+        child: Container(
+          padding: EdgeInsets.all(
+            context.responsive(compact: 26.0, medium: 40.0, expanded: 48.0),
+          ),
+          decoration: BoxDecoration(
+            color: C.panel2,
+            border: Border.all(color: C.line),
+            borderRadius: BorderRadius.circular(AppRadius.card),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Eyebrow('05 — SOFT-SKILL GROWTH'),
+              const SizedBox(height: 18),
+              Text(
+                'Not zero—just skills that need deliberate practice.',
+                style: AppFonts.heading(
+                  TextStyle(
+                    fontSize: AppTypeScale.sectionTitle(context.screenWidth),
+                    height: 1.04,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 38),
-            LayoutBuilder(
-              builder: (context, box) => box.maxWidth < AppBreakpoints.medium
-                  ? Column(children: [for (final e in data) LeadershipItem(e)])
-                  : Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (final e in data)
-                          Expanded(child: LeadershipItem(e)),
-                      ],
-                    ),
-            ),
-          ],
+              const SizedBox(height: 38),
+              LayoutBuilder(
+                builder: (context, box) => box.maxWidth < AppBreakpoints.medium
+                    ? Column(
+                        children: [for (final e in data) LeadershipItem(e)],
+                      )
+                    : Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (final e in data)
+                            Expanded(child: LeadershipItem(e)),
+                        ],
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     ),
@@ -1742,93 +1785,106 @@ class ContactSection extends StatelessWidget {
   const ContactSection({super.key, required this.onNotice});
   final ValueChanged<String> onNotice;
   @override
-  Widget build(BuildContext context) => Shell(
+  Widget build(BuildContext context) => AppShell(
     child: Padding(
-      padding: const EdgeInsets.only(bottom: 104),
-      child: Container(
-        color: C.lime,
-        padding: EdgeInsets.all(
-          context.responsive(compact: 28.0, medium: 40.0, expanded: 52.0),
+      padding: EdgeInsets.only(
+        bottom: context.responsive(
+          tiny: 36.0,
+          compact: 44.0,
+          medium: 52.0,
+          expanded: 60.0,
         ),
-        child: LayoutBuilder(
-          builder: (context, box) {
-            final copy = Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '06 — CONTACT',
-                  style: TextStyle(
-                    color: C.ink,
-                    fontSize: AppTypeScale.caption,
-                    letterSpacing: 1.6,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Open to the next serious technology challenge.',
-                  style: AppFonts.heading(
-                    TextStyle(
-                      color: C.ink,
-                      fontSize: AppTypeScale.sectionTitle(context.screenWidth),
-                      height: 1.04,
-                      letterSpacing: -1.2,
+      ),
+      child: AppReveal(
+        child: Container(
+          color: C.lime,
+          padding: EdgeInsets.all(
+            context.responsive(compact: 28.0, medium: 40.0, expanded: 52.0),
+          ),
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final copy = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '06 — CONTACT',
+                    style: TextStyle(
+                      color: C.darkText,
+                      fontSize: AppTypeScale.caption,
+                      letterSpacing: 1.6,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                ),
-                SizedBox(height: 14),
-                Text(
-                  'For software engineering, architecture, digital transformation, data, or technology leadership opportunities.',
-                  style: const TextStyle(color: C.darkAccentText, height: 1.5),
-                ),
-              ],
-            );
-            final actions = Wrap(
-              spacing: 9,
-              runSpacing: 8,
-              children: [
-                FilledButton(
-                  onPressed: () async {
-                    await Clipboard.setData(
-                      const ClipboardData(text: AppConfig.email),
-                    );
-                    onNotice(
-                      'Email placeholder copied. Replace it in the portfolio contact settings.',
-                    );
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: C.ink,
-                    foregroundColor: C.white,
+                  SizedBox(height: 16),
+                  Text(
+                    'Open to the next serious technology challenge.',
+                    style: AppFonts.heading(
+                      TextStyle(
+                        color: C.darkText,
+                        fontSize: AppTypeScale.sectionTitle(
+                          context.screenWidth,
+                        ),
+                        height: 1.04,
+                        letterSpacing: -1.2,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                   ),
-                  child: const Text('Email me'),
-                ),
-                ContactLink(
-                  'LinkedIn ↗',
-                  () => onNotice(
-                    'Add your LinkedIn URL in the contact settings.',
+                  SizedBox(height: 14),
+                  Text(
+                    'For software engineering, architecture, digital transformation, data, or technology leadership opportunities.',
+                    style: const TextStyle(
+                      color: C.darkAccentText,
+                      height: 1.5,
+                    ),
                   ),
-                ),
-                ContactLink(
-                  'GitHub ↗',
-                  () =>
-                      onNotice('Add your GitHub URL in the contact settings.'),
-                ),
-              ],
-            );
-            return box.maxWidth >= AppBreakpoints.medium
-                ? Row(
-                    children: [
-                      Expanded(flex: 3, child: copy),
-                      const SizedBox(width: 44),
-                      Expanded(flex: 2, child: actions),
-                    ],
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [copy, const SizedBox(height: 30), actions],
-                  );
-          },
+                ],
+              );
+              final actions = Wrap(
+                spacing: 9,
+                runSpacing: 8,
+                children: [
+                  FilledButton(
+                    onPressed: () async {
+                      await Clipboard.setData(
+                        const ClipboardData(text: BioConfig.email),
+                      );
+                      onNotice('Email copied to clipboard.');
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: C.ink,
+                      foregroundColor: C.white,
+                    ),
+                    child: const Text('Email me'),
+                  ),
+                  ContactLink(
+                    'LinkedIn ↗',
+                    () => onNotice(
+                      'Add your LinkedIn URL in the contact settings.',
+                    ),
+                  ),
+                  ContactLink(
+                    'GitHub ↗',
+                    () => onNotice(
+                      'Add your GitHub URL in the contact settings.',
+                    ),
+                  ),
+                ],
+              );
+              return box.maxWidth >= AppBreakpoints.medium
+                  ? Row(
+                      children: [
+                        Expanded(flex: 3, child: copy),
+                        const SizedBox(width: 44),
+                        Expanded(flex: 2, child: actions),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [copy, const SizedBox(height: 30), actions],
+                    );
+            },
+          ),
         ),
       ),
     ),
@@ -1843,7 +1899,7 @@ class ContactLink extends StatelessWidget {
   Widget build(BuildContext context) => TextButton(
     onPressed: onTap,
     style: TextButton.styleFrom(
-      foregroundColor: C.ink,
+      foregroundColor: C.darkText,
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 16),
     ),
     child: Text(text, style: const TextStyle(fontWeight: FontWeight.w800)),
@@ -1858,25 +1914,74 @@ class Footer extends StatelessWidget {
     decoration: const BoxDecoration(
       border: Border(top: BorderSide(color: C.line)),
     ),
-    child: const Shell(
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        spacing: 30,
-        runSpacing: 12,
-        children: [
-          Text(
-            'ARIO SUTRISNO  ·  TECHNOLOGY · DATA · AI · BUSINESS',
-            style: TextStyle(
+    child: AppShell(
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final identity = Text(
+            key: const ValueKey('footer-identity'),
+            '${BioConfig.name.toUpperCase()}  ·  TECHNOLOGY · DATA · AI · BUSINESS',
+            style: const TextStyle(
               fontSize: AppTypeScale.caption,
               letterSpacing: 1.1,
               fontWeight: FontWeight.w800,
             ),
-          ),
-          Text(
-            'Designed as a long-term technology leadership portfolio.',
-            style: TextStyle(color: C.muted, fontSize: AppTypeScale.caption),
-          ),
-        ],
+          );
+          final details = const Column(
+            key: ValueKey('footer-details'),
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'Designed as a long-term technology leadership portfolio.',
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  color: C.muted,
+                  fontSize: AppTypeScale.caption,
+                ),
+              ),
+              SizedBox(height: AppSpace.xxs),
+              AppCopyright(textAlign: TextAlign.right),
+            ],
+          );
+
+          if (box.maxWidth >= AppBreakpoints.footer) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: identity),
+                const SizedBox(width: AppSpace.xl),
+                Expanded(
+                  child: Align(alignment: Alignment.topRight, child: details),
+                ),
+              ],
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              identity,
+              const SizedBox(height: AppSpace.md),
+              const Align(
+                key: ValueKey('footer-details'),
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Designed as a long-term technology leadership portfolio.',
+                      style: TextStyle(
+                        color: C.muted,
+                        fontSize: AppTypeScale.caption,
+                      ),
+                    ),
+                    SizedBox(height: AppSpace.xxs),
+                    AppCopyright(),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     ),
   );
