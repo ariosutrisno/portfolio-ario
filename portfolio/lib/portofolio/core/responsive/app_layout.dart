@@ -17,9 +17,7 @@ abstract final class AppLayout {
   static double gutter(double width) {
     if (width <= AppBreakpoints.tiny) return tinyGutter;
     if (width <= AppBreakpoints.compact) return mobileGutter;
-    if (width <= AppBreakpoints.expanded) return desktopGutter;
-    if (width <= AppBreakpoints.wide) return expandedGutter;
-    return wideGutter;
+    return desktopGutter;
   }
 
   static double headerHeight(double width) => width <= AppBreakpoints.compact
