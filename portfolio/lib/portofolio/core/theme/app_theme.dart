@@ -129,64 +129,7 @@ abstract final class AppTheme {
     );
   }
 
-  static ThemeData get resume {
-    final base = ThemeData.from(
-      colorScheme: const ColorScheme.light(
-        primary: C.resumeInk,
-        onPrimary: C.pureWhite,
-        secondary: C.darkGreen,
-        surface: C.pureWhite,
-        onSurface: C.resumeTitle,
-        outline: C.resumeBorder,
-      ),
-      useMaterial3: true,
-    );
-
-    final body = base.textTheme.apply(
-      fontFamily: AppFonts.body,
-      bodyColor: C.resumeTitle,
-      displayColor: C.resumeTitle,
-    );
-
-    return base.copyWith(
-      scaffoldBackgroundColor: C.resumeSurface,
-      textTheme: body.copyWith(
-        displayLarge: AppFonts.heading(body.displayLarge),
-        headlineLarge: AppFonts.heading(body.headlineLarge),
-        headlineMedium: AppFonts.heading(body.headlineMedium),
-        titleLarge: AppFonts.heading(body.titleLarge),
-        titleMedium: AppFonts.heading(body.titleMedium),
-        bodyLarge: body.bodyLarge?.copyWith(height: 1.6),
-        bodyMedium: body.bodyMedium?.copyWith(height: 1.6),
-      ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: C.resumeInk,
-          foregroundColor: C.pureWhite,
-          minimumSize: const Size(44, 48),
-          shape: const StadiumBorder(),
-          textStyle: AppFonts.bodyStyle(
-            const TextStyle(fontWeight: FontWeight.w700),
-          ),
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: C.resumeInk,
-          minimumSize: const Size(44, 44),
-          textStyle: AppFonts.bodyStyle(
-            const TextStyle(fontWeight: FontWeight.w700),
-          ),
-        ),
-      ),
-      dividerTheme: const DividerThemeData(color: C.resumeRule),
-      textSelectionTheme: const TextSelectionThemeData(
-        cursorColor: C.darkGreen,
-        selectionColor: C.black14,
-        selectionHandleColor: C.darkGreen,
-      ),
-    );
-  }
+  static ThemeData get resume => dark;
 
   /// Applies DM Sans to body styles and Manrope to display/title styles.
   static TextTheme _textTheme(TextTheme source) {

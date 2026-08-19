@@ -6,12 +6,12 @@ import 'package:portofolio/portofolio/core/design_system.dart';
 
 void main() {
   group('global design tokens', () {
-    test('calm navy monochrome palette retains its exact values', () {
+    test('modern dark luxury palette retains its exact values', () {
       expect(C.garudaNavy, const Color(0xFF002561));
-      expect(C.background, C.garudaNavy);
-      expect(C.accent, C.text);
-      expect(C.text, const Color(0xFFF4F6F8));
-      expect(C.darkText, const Color(0xFF111111));
+      expect(C.background, const Color(0xFF0B0F19));
+      expect(C.accent, const Color(0xFF38BDF8));
+      expect(C.text, const Color(0xFFF8FAFC));
+      expect(C.darkText, const Color(0xFF0B0F19));
     });
 
     test('brand surfaces keep important text comfortably readable', () {

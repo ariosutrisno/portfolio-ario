@@ -6,8 +6,8 @@ import 'app_colors.dart';
 
 /// The two bundled font families plus platform-safe fallbacks.
 ///
-/// DM Sans is the global body face and Manrope is the display/heading face,
-/// matching the CSS reference. Both font files are registered in pubspec.yaml.
+/// DM Sans is the global body face and Manrope is the display/heading face.
+/// Both font files are registered in pubspec.yaml.
 abstract final class AppFonts {
   static const body = 'DM Sans';
   static const display = 'Manrope';
@@ -23,16 +23,22 @@ abstract final class AppFonts {
       (source ?? const TextStyle()).copyWith(
         fontFamily: body,
         fontFamilyFallback: fallbacks,
+        letterSpacing: source?.letterSpacing ?? 0.15,
+        height: source?.height ?? 1.6,
       );
 
-  static TextStyle heading([TextStyle? source]) => (source ?? const TextStyle())
-      .copyWith(fontFamily: display, fontFamilyFallback: fallbacks);
+  static TextStyle heading([TextStyle? source]) =>
+      (source ?? const TextStyle()).copyWith(
+        fontFamily: display,
+        fontFamilyFallback: fallbacks,
+        letterSpacing: source?.letterSpacing ?? -0.2,
+        height: source?.height ?? 1.25,
+      );
 }
 
-/// Complete named type scale collected from `styles.css`.
+/// Complete named type scale.
 ///
-/// The fluid methods implement CSS-like `clamp()` behavior so headings scale
-/// smoothly between phone and desktop instead of jumping at each breakpoint.
+/// The fluid methods implement smooth scaling between phone and desktop.
 abstract final class AppTypeScale {
   static const tiny = 8.0;
   static const micro = 9.0;
@@ -56,7 +62,7 @@ abstract final class AppTypeScale {
   static const caseTitle = 40.0;
   static const mobileHero = 44.0;
 
-  /// Linear interpolation used to mirror CSS `clamp(min, vw, max)` values.
+  /// Linear interpolation used to scale typography smoothly.
   static double fluid(
     double width, {
     required double minimum,
@@ -95,5 +101,7 @@ abstract final class AppTextStyles {
     color: C.muted,
     fontSize: AppTypeScale.micro,
     fontWeight: FontWeight.w700,
+    letterSpacing: 0.5,
   );
 }
+

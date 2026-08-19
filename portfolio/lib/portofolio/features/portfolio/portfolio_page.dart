@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:portofolio/portofolio/core/app_config.dart';
 import 'package:portofolio/portofolio/core/bio_config.dart';
 import 'package:portofolio/portofolio/core/design_system.dart';
 import 'package:portofolio/portofolio/features/case_study/case_study_data.dart';
@@ -120,7 +119,9 @@ class Background extends StatelessWidget {
   const Background({super.key});
   @override
   Widget build(BuildContext context) => const IgnorePointer(
-    child: DecoratedBox(decoration: BoxDecoration(color: C.background)),
+    child: DecoratedBox(
+      decoration: BoxDecoration(gradient: AppGradients.background),
+    ),
   );
 }
 
@@ -317,15 +318,15 @@ class HeroCopy extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Eyebrow('GARUDA INDONESIA · OPERATIONS · SOFTWARE'),
+      const Eyebrow(BioConfig.heroEyebrow),
       const SizedBox(height: 22),
       Text.rich(
         TextSpan(
           children: [
-            const TextSpan(text: 'Turning aviation experience into '),
-            TextSpan(
-              text: 'clear digital tools.',
-              style: const TextStyle(color: C.lime),
+            const TextSpan(text: BioConfig.heroTitlePrefix),
+            const TextSpan(
+              text: BioConfig.heroTitleAccent,
+              style: TextStyle(color: C.accent),
             ),
           ],
         ),
@@ -340,7 +341,7 @@ class HeroCopy extends StatelessWidget {
       ),
       const SizedBox(height: 24),
       Text(
-        'I’m ${BioConfig.name}. I work at ${AppConfig.workplace} and I’m building my path into software development through two operationally grounded projects, extensive Codex assistance, and honest continuous learning.',
+        BioConfig.heroBio,
         style: TextStyle(
           color: C.leadText,
           fontSize: context.isCompact
@@ -376,8 +377,7 @@ class HeroCopy extends StatelessWidget {
         runSpacing: 20,
         children: [
           Proof('2 real projects', 'FSMS & Digital Ramp Checklist'),
-          Proof('Aviation context', 'Experience from Garuda Indonesia'),
-          Proof('AI-assisted', 'Built openly with extensive Codex use'),
+          Proof('5 technology anchors', 'Office, SQL, Laravel, Flutter, AI'),
         ],
       ),
     ],
@@ -639,30 +639,41 @@ class CapabilityBand extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    color: C.lime,
-    padding: const EdgeInsets.symmetric(vertical: 19),
+    decoration: const BoxDecoration(
+      color: C.panel2,
+      border: Border.symmetric(
+        horizontal: BorderSide(color: C.line),
+      ),
+    ),
+    padding: const EdgeInsets.symmetric(vertical: 20),
     child: AppShell(
       child: Wrap(
         alignment: WrapAlignment.center,
-        spacing: 15,
-        runSpacing: 9,
+        spacing: 18,
+        runSpacing: 10,
         children: [
-          for (final item in [
-            'MICROSOFT OFFICE',
-            'MYSQL / MARIADB',
-            'LARAVEL',
-            'FLUTTER',
-            'BOOTSTRAP',
-            'CODEX / AI WORKFLOW',
-          ])
-            Text(
-              '$item  •',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: C.darkText,
-                fontSize: AppTypeScale.caption,
-                letterSpacing: .8,
-                fontWeight: FontWeight.w900,
+          for (final item in BioConfig.capabilities)
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: item,
+                    style: const TextStyle(
+                      color: C.text,
+                      fontSize: AppTypeScale.caption,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const TextSpan(
+                    text: '  •',
+                    style: TextStyle(
+                      color: C.accent,
+                      fontSize: AppTypeScale.caption,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
               ),
             ),
         ],
@@ -1797,7 +1808,20 @@ class ContactSection extends StatelessWidget {
       ),
       child: AppReveal(
         child: Container(
-          color: C.lime,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF192438),
+                C.panel,
+                Color(0xFF111827),
+              ],
+            ),
+            border: Border.all(color: C.lineStrong),
+            borderRadius: BorderRadius.circular(AppRadius.card),
+            boxShadow: AppShadows.card,
+          ),
           padding: EdgeInsets.all(
             context.responsive(compact: 28.0, medium: 40.0, expanded: 52.0),
           ),
@@ -1806,67 +1830,76 @@ class ContactSection extends StatelessWidget {
               final copy = Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '06 — CONTACT',
+                  const Text(
+                    BioConfig.contactEyebrow,
                     style: TextStyle(
-                      color: C.darkText,
+                      color: C.accent,
                       fontSize: AppTypeScale.caption,
                       letterSpacing: 1.6,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
-                    'Open to the next serious technology challenge.',
+                    BioConfig.contactTitle,
                     style: AppFonts.heading(
                       TextStyle(
-                        color: C.darkText,
+                        color: C.text,
                         fontSize: AppTypeScale.sectionTitle(
                           context.screenWidth,
                         ),
-                        height: 1.04,
+                        height: 1.08,
                         letterSpacing: -1.2,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),
-                  SizedBox(height: 14),
-                  Text(
-                    'For software engineering, architecture, digital transformation, data, or technology leadership opportunities.',
-                    style: const TextStyle(
-                      color: C.darkAccentText,
-                      height: 1.5,
+                  const SizedBox(height: 14),
+                  const Text(
+                    BioConfig.contactSubtitle,
+                    style: TextStyle(
+                      color: C.muted,
+                      height: 1.6,
+                      fontSize: AppTypeScale.body,
                     ),
                   ),
                 ],
               );
               final actions = Wrap(
-                spacing: 9,
-                runSpacing: 8,
+                spacing: 12,
+                runSpacing: 10,
                 children: [
-                  FilledButton(
+                  FilledButton.icon(
                     onPressed: () async {
                       await Clipboard.setData(
                         const ClipboardData(text: BioConfig.email),
                       );
-                      onNotice('Email copied to clipboard.');
+                      onNotice('Email copied: ${BioConfig.email}');
                     },
+                    icon: const Icon(Icons.mail_outline_rounded, size: 18),
                     style: FilledButton.styleFrom(
-                      backgroundColor: C.ink,
-                      foregroundColor: C.white,
+                      backgroundColor: C.accent,
+                      foregroundColor: C.darkText,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 22,
+                        vertical: 14,
+                      ),
                     ),
-                    child: const Text('Email me'),
+                    label: const Text(
+                      BioConfig.contactCta,
+                      style: TextStyle(fontWeight: FontWeight.w800),
+                    ),
                   ),
                   ContactLink(
                     'LinkedIn ↗',
                     () => onNotice(
-                      'Add your LinkedIn URL in the contact settings.',
+                      'LinkedIn: ${BioConfig.linkedInUrl}',
                     ),
                   ),
                   ContactLink(
                     'GitHub ↗',
                     () => onNotice(
-                      'Add your GitHub URL in the contact settings.',
+                      'GitHub: ${BioConfig.githubUrl}',
                     ),
                   ),
                 ],
@@ -1881,7 +1914,7 @@ class ContactSection extends StatelessWidget {
                     )
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [copy, const SizedBox(height: 30), actions],
+                      children: [copy, const SizedBox(height: 28), actions],
                     );
             },
           ),
@@ -1896,11 +1929,13 @@ class ContactLink extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => TextButton(
+  Widget build(BuildContext context) => OutlinedButton(
     onPressed: onTap,
-    style: TextButton.styleFrom(
-      foregroundColor: C.darkText,
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 16),
+    style: OutlinedButton.styleFrom(
+      foregroundColor: C.text,
+      side: const BorderSide(color: C.lineStrong),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      shape: const StadiumBorder(),
     ),
     child: Text(text, style: const TextStyle(fontWeight: FontWeight.w800)),
   );

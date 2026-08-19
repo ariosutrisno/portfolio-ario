@@ -20,14 +20,22 @@ class AppIdentityMark extends StatelessWidget {
         height: 35,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: C.garudaNavy,
-          border: Border.all(color: C.white),
+          color: C.panel,
+          border: Border.all(color: C.accent, width: 1.5),
           borderRadius: BorderRadius.circular(AppRadius.small),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x2638BDF8),
+              blurRadius: 10,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
         child: Text(
           BioConfig.initials,
           semanticsLabel: '${BioConfig.name} initials',
           style: const TextStyle(
+            color: C.accent,
             fontSize: AppTypeScale.small,
             fontWeight: FontWeight.w900,
           ),
@@ -39,6 +47,7 @@ class AppIdentityMark extends StatelessWidget {
           BioConfig.name.toUpperCase(),
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
+            color: C.text,
             fontSize: AppTypeScale.bodySmall,
             letterSpacing: 1.5,
             fontWeight: FontWeight.w800,
