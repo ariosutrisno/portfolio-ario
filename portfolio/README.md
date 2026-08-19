@@ -1,77 +1,55 @@
-# Ario Portfolio
+# 📱 Ario Sutrisno — Portfolio App
 
-Responsive Flutter portfolio for mobile, desktop, and web. The global visual
-foundation is translated from the original `styles.css`, while interaction
-timings and reduced-motion behavior follow `script.js` and its CSS companion.
+Aplikasi web & multiplatform portfolio interaktif berbasis **Flutter**, dirancang dengan estetika modern, performa tinggi, dan responsif penuh di semua perangkat.
 
-## Global architecture
+---
 
-All reusable settings and helpers live under `lib/portofolio/core`:
+## 📌 Ringkasan Portfolio
 
-- `theme/app_colors.dart`: every source CSS color, including translucent values.
-- `theme/app_typography.dart`: DM Sans, Manrope, fallback fonts, and fluid sizes.
-- `theme/app_effects.dart`: gradients and shadows.
-- `theme/app_tokens.dart`: spacing, radius, and motion constants.
-- `theme/app_theme.dart`: the Material theme consumed by the entire app.
-- `responsive/`: breakpoints, layout formulas, and `BuildContext` helpers.
-- `accessibility/`: reduced-motion handling.
-- `input/`: touch, mouse, stylus, and trackpad scrolling.
-- `widgets/`: shared widgets such as the globally responsive content shell.
+| Bagian | Deskripsi Singkat | Highlight / Tech |
+| :--- | :--- | :--- |
+| 🚀 **Hero & Direction** | Pengenalan profil, latar belakang operasional Garuda Indonesia, dan arah karier software engineering | Modern Typography, Custom Orbit Painter, Ambient Glow |
+| 💼 **Selected Work** | Proyek nyata yang berfokus pada digitalisasi alur kerja operasional | **FSMS** (Laravel, MariaDB) & **Digital Ramp Checklist** (Flutter) |
+| 🔬 **Learning Lab** | Studi konsep arsitektur data, AI workflow, dan sistem terintegrasi | Data Quality Review & Enterprise Integration |
+| 🛠️ **Current Toolkit** | Stack teknologi & workflow pengembangan yang digunakan secara jujur | Flutter, Laravel, MySQL/MariaDB, Codex & AI Pairing |
+| 📄 **Curriculum Vitae** | Halaman CV bertema *Clean White Paper* yang elegan, jernih, dan nyaman dibaca | Glassmorphism, Interactive Pills, Auto Clipboard Copy |
+| 📬 **Contact & Socials** | Akses komunikasi langsung dan jejaring profesional | Email direct copy, LinkedIn, & GitHub links |
 
-`core/design_system.dart` is the public barrel. Feature code imports that one
-file rather than knowing the internal folder structure.
+---
 
-## Code order convention
+## 🛠️ Tech Stack & Architecture
 
-Every Dart file follows this order so additions remain easy to track:
+| Kategori | Teknologi / Library |
+| :--- | :--- |
+| **Framework** | [Flutter 3.x](https://flutter.dev) (Dart SDK) |
+| **Design System** | Custom Token System (`app_colors`, `app_tokens`, `app_typography`, `app_effects`) |
+| **Responsive Engine** | Multi-breakpoint Logical Widths (320px → 2560px+) |
+| **Target Platform** | Web (GitHub Pages), Android, iOS, Windows, macOS, Linux |
 
-1. SDK and package imports, followed by project imports.
-2. Classes, enums, extensions, and immutable data models.
-3. Top-level functions only when a function does not belong to a class.
+---
 
-Feature-specific widgets remain inside their feature. A helper used by more
-than one feature must be promoted to the appropriate `core` folder first.
+## 📂 Struktur Modul
 
-## Responsive coverage
+```text
+lib/portofolio/
+├── core/                  # Design tokens, responsive helpers, & reusable widgets
+│   ├── responsive/        # Breakpoints & adaptive layout system
+│   ├── theme/             # Color palette, typography, & gradients
+│   └── widgets/           # AppShell, AppReveal, & Identity marks
+└── features/              # Feature screens
+    ├── portfolio/         # Landing page & section views
+    ├── resume/            # Elegant White-Paper CV screen
+    └── case_study/        # Detailed project & concept case studies
+```
 
-The responsive system uses logical width instead of device names, so the same
-rules apply across Android, iOS, Windows, macOS, Linux, and browsers. Automated
-widget tests exercise widths from 240 px through 3440 px, portrait/landscape,
-mobile navigation, scrolling, dialogs, and enlarged text.
+---
 
-Run validation with:
+## 🧪 Validasi & Testing
 
 ```sh
-flutter analyze
+# Analisis kode & standard linter
+dart analyze lib/portofolio
+
+# Menjalankan unit & widget test
 flutter test
 ```
-
-### Multiplatform app icon
-
-The browser favicon and native launcher icons use initials read from
-`BioConfig.name`. After changing the configured name, regenerate every static
-platform icon with:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File tool/generate_app_icons.ps1
-```
-
-The generator creates flat navy-and-white icons for web, Android, iOS, Linux,
-macOS, and Windows. It does not build the application.
-
-## Portfolio content
-
-The public story intentionally separates demonstrated work from learning
-explorations:
-
-- Selected projects: FSMS — FOO Station Management System and Digital Ramp
-  Checklist.
-- Concept studies: Aviation Data Quality & AI Review and Enterprise
-  Integration Architecture. These pages are explicitly labelled as learning
-  exercises, not deployed Garuda Indonesia products.
-- Resume: a responsive Flutter page with current tools, frameworks, project
-  context, AI-assisted workflow, and soft-skill growth areas.
-
-Personal claims are deliberately conservative. The portfolio states that Codex
-is used extensively and avoids confidential company data, invented outcomes,
-or unsupported job-title claims.

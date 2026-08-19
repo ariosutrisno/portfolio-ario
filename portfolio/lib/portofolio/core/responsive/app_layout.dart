@@ -4,9 +4,12 @@ import 'app_breakpoints.dart';
 abstract final class AppLayout {
   static const double minSupportedWidth = 240;
   static const double maxContentWidth = 1240;
+  static const double maxContentWidthWide = 1440;
   static const double tinyGutter = 12;
   static const double mobileGutter = 15;
   static const double desktopGutter = 24;
+  static const double expandedGutter = 28;
+  static const double wideGutter = 36;
   static const double mobileHeaderHeight = 68;
   static const double desktopHeaderHeight = 78;
 
@@ -14,7 +17,9 @@ abstract final class AppLayout {
   static double gutter(double width) {
     if (width <= AppBreakpoints.tiny) return tinyGutter;
     if (width <= AppBreakpoints.compact) return mobileGutter;
-    return desktopGutter;
+    if (width <= AppBreakpoints.expanded) return desktopGutter;
+    if (width <= AppBreakpoints.wide) return expandedGutter;
+    return wideGutter;
   }
 
   static double headerHeight(double width) => width <= AppBreakpoints.compact

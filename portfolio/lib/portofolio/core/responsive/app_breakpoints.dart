@@ -9,6 +9,7 @@ abstract final class AppBreakpoints {
   static const double expanded = 1240;
   static const double large = 1440;
   static const double wide = 1920;
+  static const double ultraWide = 2560;
 
   // Semantic aliases explain why a component switches at a given width.
   static const double navigation = medium;

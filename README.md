@@ -1,34 +1,66 @@
-# Ario Portfolio
+# 🌐 Ario Sutrisno — Interactive Portfolio
 
-Flutter portfolio application deployed to GitHub Pages.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-brightgreen?style=for-the-badge&logo=github)](https://ariosutrisno.github.io/portfolio-ario/)
 
-## Repository structure
+Aplikasi portfolio digital interaktif berbasis **Flutter Web & Multiplatform**. Menggabungkan pengalaman operasional maskapai Garuda Indonesia dengan pengembangan perangkat lunak modern, UI responsif, dan kurikulum vitae interaktif.
 
-- `portfolio/` contains the Flutter application and its platform projects.
-- `.github/workflows/deploy.yml` validates, builds, and deploys the web release.
+---
 
-## Local development
 
-Run the following commands from the repository root:
+## ⚙️ Cara Kerja Aplikasi
+
+Aplikasi ini dibangun menggunakan arsitektur modular Flutter dengan prinsip desain token dan *fluid responsiveness*:
+
+1. **Sistem Responsif Adaptif (All-Device Ready)**
+   - Menggunakan kalkulasi piksel logis yang dikelompokkan ke 6 tingkatan breakpoint (`tiny` 320px, `compact` 680px, `medium` 1000px, `expanded` 1240px, `large` 1440px, `ultraWide` 2560px+).
+   - Menyesuaikan tata letak grid, ukuran tipografi (*fluid scale*), gutter, dan navigasi (Header desktop ↔ Mobile drawer) secara otomatis tanpa jeda render.
+   - Presisi di semua perangkat: HP Android kecil, iPhone (SE/Pro/Max), iPad/Tablet, Laptop, Monitor Full HD hingga Ultra-wide 4K.
+
+2. **Navigasi & State Management**
+   - **One-Page Navigation**: Menggunakan `Scrollable.ensureVisible` dengan animasi kurva halus (`easeInOutCubic`) untuk melompat antar seksi (Work, Expertise, Journey, About, Contact).
+   - **Sub-pages**: Routing mulus ke halaman **Case Study** dan **Curriculum Vitae (Clean White-Paper Mode)**.
+
+3. **Design System Mandiri**
+   - Warna, gradasi, tipografi (DM Sans & Manrope), bayangan, dan radius terpusat di `lib/portofolio/core/theme/`.
+   - Mengadopsi kontras tinggi, anti-glare, dan aksen warna hidup yang nyaman di mata pembaca.
+
+---
+
+## 🚀 Panduan Menjalankan di Lokal (Local Development)
+
+### 1. Prasyarat
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (versi 3.24 atau lebih baru)
+- Browser Chrome / Edge atau Emulator Android/iOS
+
+### 2. Langkah Instalasi & Menjalankan
 
 ```sh
-cd portfolio
+# 1. Clone repository
+git clone https://github.com/ariosutrisno/portfolio-ario.git
+cd portfolio-ario/portfolio
+
+# 2. Ambil dependensi
 flutter pub get
-flutter analyze
+
+# 3. Validasi kode
+dart analyze lib/portofolio
 flutter test
+
+# 4. Jalankan aplikasi di browser (Hot Reload aktif)
 flutter run -d chrome
 ```
 
-Create the same release bundle used by GitHub Pages with:
+---
+
+## 📦 Build & Deployment (GitHub Pages)
+
+Aplikasi ini sudah terintegrasi dengan **GitHub Actions** (`.github/workflows/deploy.yml`) untuk build dan deploy otomatis ke GitHub Pages saat push ke branch `main`.
+
+Untuk melakukan build manual:
 
 ```sh
 cd portfolio
 flutter build web --release --base-href "/portfolio-ario/"
 ```
 
-Pushes to `main` that change the Flutter app or deployment workflow trigger the
-GitHub Pages pipeline. In the repository settings, set **Pages > Source** to
-**GitHub Actions** before the first deployment.
-
-For architecture, design-system, and content notes, see
-[`portfolio/README.md`](portfolio/README.md).
+Hasil build bundle produksi akan berada di folder `portfolio/build/web/`.

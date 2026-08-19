@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../responsive/app_breakpoints.dart';
 import '../responsive/app_layout.dart';
 import '../responsive/responsive_context.dart';
 
@@ -18,11 +19,12 @@ class AppShell extends StatelessWidget {
       final availableWidth = box.maxWidth.isFinite
           ? box.maxWidth
           : context.screenWidth;
+      final maxWidth = context.screenWidth >= AppBreakpoints.large
+          ? AppLayout.maxContentWidthWide
+          : AppLayout.maxContentWidth;
       return Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: AppLayout.maxContentWidth,
-          ),
+          constraints: BoxConstraints(maxWidth: maxWidth),
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: AppLayout.gutter(availableWidth),

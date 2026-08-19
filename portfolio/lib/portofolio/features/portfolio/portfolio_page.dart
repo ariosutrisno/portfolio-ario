@@ -371,15 +371,7 @@ class HeroCopy extends StatelessWidget {
           ),
         ],
       ),
-      const SizedBox(height: 45),
-      const Wrap(
-        spacing: 34,
-        runSpacing: 20,
-        children: [
-          Proof('2 real projects', 'FSMS & Digital Ramp Checklist'),
-          Proof('5 technology anchors', 'Office, SQL, Laravel, Flutter, AI'),
-        ],
-      ),
+
     ],
   );
 }
@@ -411,135 +403,149 @@ class Proof extends StatelessWidget {
 
 class HeroVisual extends StatelessWidget {
   const HeroVisual({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final visual = CustomPaint(
-      painter: OrbitPainter(),
-      child: Stack(
-        clipBehavior: Clip.none,
+    final isCompact = context.isCompact;
+    final isTiny = context.isTiny;
+
+    final cardWidth = context.responsive<double>(
+      tiny: 320.0,
+      compact: 380.0,
+      medium: 420.0,
+      expanded: 460.0,
+    );
+
+    final cardPadding = context.responsive<double>(
+      tiny: 14.0,
+      compact: 18.0,
+      medium: 22.0,
+      expanded: 26.0,
+    );
+
+    final titleFontSize = context.responsive<double>(
+      tiny: 17.0,
+      compact: 19.0,
+      medium: 21.0,
+      expanded: 23.0,
+    );
+
+    final card = Container(
+      width: double.infinity,
+      constraints: BoxConstraints(maxWidth: cardWidth),
+      padding: EdgeInsets.all(cardPadding),
+      decoration: BoxDecoration(
+        color: C.panel97,
+        border: Border.all(color: C.lineStrong),
+        borderRadius: BorderRadius.circular(
+          context.responsive(tiny: AppRadius.medium, compact: AppRadius.card, medium: AppRadius.hero),
+        ),
+        boxShadow: AppShadows.card,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 470),
-              child: Container(
-                width: double.infinity,
-                height: context.isCompact ? 360 : 430,
-                padding: EdgeInsets.all(
-                  context.isCompact ? AppSpace.base : AppSpace.lg,
-                ),
-                decoration: BoxDecoration(
-                  color: C.panel97,
-                  border: Border.all(color: C.lineStrong),
-                  borderRadius: BorderRadius.circular(AppRadius.hero),
-                ),
+          // 1. Status header line
+          Row(
+            children: [
+              const SignalDot(),
+              const SizedBox(width: 8),
+              Expanded(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                    width: 280,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Row(
-                          children: [
-                            SignalDot(),
-                            SizedBox(width: 9),
-                            Expanded(
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  'FIRST PORTFOLIO · LEARNING IN PUBLIC',
-                                  style: TextStyle(
-                                    color: C.muted,
-                                    fontSize: AppTypeScale.label,
-                                    letterSpacing: 1.3,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 23),
-                        Text(
-                          'Observe → Build → Improve',
-                          style: AppFonts.heading(
-                            const TextStyle(
-                              fontSize: AppTypeScale.titleLarge,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -.8,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 21),
-                        const Row(
-                          children: [
-                            Expanded(child: MiniSkill('01', 'LARAVEL')),
-                            SizedBox(width: 10),
-                            Expanded(child: MiniSkill('02', 'FLUTTER')),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        const Row(
-                          children: [
-                            Expanded(child: MiniSkill('03', 'MYSQL')),
-                            SizedBox(width: 10),
-                            Expanded(child: MiniSkill('04', 'CODEX')),
-                          ],
-                        ),
-                        const SizedBox(height: 21),
-                        const Divider(color: C.line),
-                        const SizedBox(height: 8),
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  'HONEST · TESTED · ITERATIVE',
-                                  style: TextStyle(
-                                    color: C.muted,
-                                    fontSize: AppTypeScale.micro,
-                                    letterSpacing: 1,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Icon(Icons.arrow_outward_rounded, size: 17),
-                          ],
-                        ),
-                      ],
+                  child: Text(
+                    'FIRST PORTFOLIO · LEARNING IN PUBLIC',
+                    style: TextStyle(
+                      color: C.muted,
+                      fontSize: isTiny ? AppTypeScale.micro : AppTypeScale.label,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
               ),
+            ],
+          ),
+
+          SizedBox(height: isCompact ? 16 : 22),
+
+          // 2. Main card title
+          Text(
+            'Observe → Build → Improve',
+            style: AppFonts.heading(
+              TextStyle(
+                fontSize: titleFontSize,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.6,
+              ),
             ),
           ),
-          const Positioned(top: 48, left: 0, child: FloatTag('GARUDA CONTEXT')),
-          const Positioned(
-            right: -4,
-            top: 100,
-            child: FloatTag('2 REAL PROJECTS'),
+
+          SizedBox(height: isCompact ? 16 : 20),
+
+          // 3. Skills grid 2x2
+          Row(
+            children: const [
+              Expanded(child: MiniSkill('01', 'LARAVEL')),
+              SizedBox(width: 8),
+              Expanded(child: MiniSkill('02', 'FLUTTER')),
+            ],
           ),
-          const Positioned(
-            bottom: 50,
-            left: 18,
-            child: FloatTag('AI-ASSISTED'),
+          const SizedBox(height: 8),
+          Row(
+            children: const [
+              Expanded(child: MiniSkill('03', 'MYSQL')),
+              SizedBox(width: 8),
+              Expanded(child: MiniSkill('04', 'CODEX')),
+            ],
+          ),
+
+          SizedBox(height: isCompact ? 16 : 20),
+          const Divider(color: C.line),
+          const SizedBox(height: 10),
+
+          // 4. Footer indicator
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'HONEST · TESTED · ITERATIVE',
+                    style: TextStyle(
+                      color: C.muted,
+                      fontSize: isTiny ? 8.5 : AppTypeScale.micro,
+                      letterSpacing: 1,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_outward_rounded, size: 16, color: C.muted),
+            ],
           ),
         ],
       ),
     );
 
-    if (context.isCompact) {
-      return SizedBox(height: 420, child: visual);
+    // On mobile / compact: render the clean self-contained card
+    if (isCompact) {
+      return Center(child: card);
     }
-    return AspectRatio(aspectRatio: 1, child: visual);
+
+    // On desktop / wide screens: render orbit background around the card
+    return AspectRatio(
+      aspectRatio: 1.05,
+      child: CustomPaint(
+        painter: OrbitPainter(),
+        child: Center(child: card),
+      ),
+    );
   }
 }
 
@@ -551,16 +557,16 @@ class OrbitPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
     p.color = C.line;
-    canvas.drawCircle(center, size.shortestSide * .43, p);
+    canvas.drawCircle(center, size.shortestSide * .45, p);
     p.color = C.accentGlow23;
-    canvas.drawCircle(center, size.shortestSide * .34, p);
+    canvas.drawCircle(center, size.shortestSide * .36, p);
     canvas.drawCircle(
-      Offset(size.width * .82, size.height * .25),
+      Offset(size.width * .84, size.height * .24),
       4,
       Paint()..color = C.lime,
     );
     canvas.drawCircle(
-      Offset(size.width * .17, size.height * .72),
+      Offset(size.width * .16, size.height * .74),
       3,
       Paint()..color = C.blue,
     );
@@ -576,7 +582,17 @@ class SignalDot extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     width: 8,
     height: 8,
-    decoration: const BoxDecoration(color: C.lime, shape: BoxShape.circle),
+    decoration: BoxDecoration(
+      color: C.lime,
+      shape: BoxShape.circle,
+      boxShadow: [
+        BoxShadow(
+          color: C.lime.withValues(alpha: 0.5),
+          blurRadius: 6,
+          spreadRadius: 1,
+        ),
+      ],
+    ),
   );
 }
 
@@ -585,53 +601,45 @@ class MiniSkill extends StatelessWidget {
   final String number;
   final String label;
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: C.ink,
-      border: Border.all(color: C.line),
-      borderRadius: BorderRadius.circular(5),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          number,
-          style: const TextStyle(color: C.lime, fontSize: AppTypeScale.label),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: AppTypeScale.caption,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class FloatTag extends StatelessWidget {
-  const FloatTag(this.text, {super.key});
-  final String text;
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-    decoration: BoxDecoration(
-      color: C.panel2,
-      border: Border.all(color: C.line),
-      borderRadius: BorderRadius.circular(4),
-    ),
-    child: Text(
-      text,
-      style: const TextStyle(
-        fontSize: AppTypeScale.micro,
-        letterSpacing: 1.2,
-        fontWeight: FontWeight.w800,
+  Widget build(BuildContext context) {
+    final isTiny = context.isTiny;
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isTiny ? 8 : 10,
+        vertical: isTiny ? 8 : 10,
       ),
-    ),
-  );
+      decoration: BoxDecoration(
+        color: C.ink,
+        border: Border.all(color: C.line),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            number,
+            style: const TextStyle(
+              color: C.lime,
+              fontSize: AppTypeScale.micro,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: isTiny ? AppTypeScale.micro : AppTypeScale.caption,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class CapabilityBand extends StatelessWidget {
@@ -1054,7 +1062,7 @@ class ProjectArt extends StatelessWidget {
   final Art art;
   @override
   Widget build(BuildContext context) => Container(
-    height: context.isCompact ? 270 : 330,
+    height: context.responsive(tiny: 230.0, compact: 270.0, medium: 330.0),
     padding: EdgeInsets.all(context.isCompact ? AppSpace.lg : 28),
     decoration: const BoxDecoration(color: C.artStart),
     child: MediaQuery.withClampedTextScaling(
@@ -1361,7 +1369,7 @@ class ExpertiseCard extends StatelessWidget {
   final (String, String, String, String) data;
   @override
   Widget build(BuildContext context) => Container(
-    constraints: const BoxConstraints(minHeight: 250),
+    constraints: const BoxConstraints(minHeight: 200),
     padding: const EdgeInsets.all(27),
     decoration: BoxDecoration(
       color: C.panel2,
@@ -1473,6 +1481,7 @@ class JourneySection extends StatelessWidget {
               final itemWidth = (box.maxWidth - gap * (columns - 1)) / columns;
               return Wrap(
                 spacing: gap,
+                runSpacing: gap,
                 children: [
                   for (final e in data.indexed)
                     AppReveal(
@@ -1595,7 +1604,7 @@ class AboutSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(child: title),
-                    const SizedBox(width: 90),
+                    SizedBox(width: context.responsive(compact: 40.0, medium: 60.0, expanded: 90.0)),
                     const Expanded(child: copy),
                   ],
                 )
@@ -1765,7 +1774,10 @@ class LeadershipItem extends StatelessWidget {
   final (String, String) data;
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(right: 25, bottom: 20),
+    padding: EdgeInsets.only(
+      right: context.isCompact ? 0 : 25,
+      bottom: 20,
+    ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1997,7 +2009,7 @@ class Footer extends StatelessWidget {
               identity,
               const SizedBox(height: AppSpace.md),
               const Align(
-                key: ValueKey('footer-details'),
+                key: ValueKey('footer-details-mobile'),
                 alignment: Alignment.centerLeft,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
